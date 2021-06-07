@@ -10,8 +10,7 @@ async function main () {
   rest
     .map(o => o.match(/private static final Map<String, String> (.+) = ImmutableMap\.builder\(\)(.+)\.build()/))
     .map(o => {
-      let data = o[2].split('.put')
-      data.shift()
+      let [, ...data] = o[2].split('.put')
       data = data.map(o => {
         const [, oldName, newName] = o.match(/\("(.+)", "(.+)"\)/)
         return [oldName, newName]
@@ -25,9 +24,8 @@ async function main () {
 }
 
 function compileSkippedObj (skipped) {
-  let [, name, data] = skipped.match(/private static final Set<String> (.+) = ImmutableSet\.builder\(\)(.+)\.build()/)
-  data = data.split('.add')
-  data.shift()
-  data = data.map(o => o.match(/\("(.+)"\)/)[1])
-  return [name, data]
+  const [, name, data] = skipped.match(/private static final Set<String> (.+) = ImmutableSet\.builder\(\)(.+)\.build()/)
+  let [, ...splitData] = data.split('.add')
+  splitData = splitData.map(o => o.match(/\("(.+)"\)/)[1])
+  return [name, splitData]
 }
